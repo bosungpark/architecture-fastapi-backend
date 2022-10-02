@@ -1,17 +1,35 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import MetaData, Table, Column, Integer, String, Date, ForeignKey
+from sqlalchemy.orm import mapper
 
-Base=declarative_base()
+from repository_pattern import model
 
-class Order(Base):
-    id=Column(Integer, primary_key=True)
+metadata=MetaData()
 
-class OrderLine(Base):
-    id = Column(Integer, primary_key=True)
-    sku=Column(String(250))
-    qty=Integer(String(250))
-    order_id=Column(Integer, ForeignKey("order.id"))
-    order=relationship(Order)
+order_lines=Table(
+    "order_lines",metadata,
+    Column("id",Integer, primary_key=True, autoincrement=True),
+    Column("sku",String(250)),
+    Column("qty",Integer, nullable=False),
+    Column("orderid", String(250))
+)
 
-class Allocation(Base):
-    ...
+batches = Table(
+    "batches",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("reference", String(255)),
+    Column("sku", String(255)),
+    Column("_purchased_quantity", Integer, nullable=False),
+    Column("eta", Date, nullable=True),
+)
+
+allocations = Table(
+    "allocations",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("orderline_id", ForeignKey("order_lines.id")),
+    Column("batch_id", ForeignKey("batches.id")),
+)
+
+def start_mappers():
+    lines_mapper=mapper(model.OrderLine, order_lines)
