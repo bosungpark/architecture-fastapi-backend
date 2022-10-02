@@ -3,18 +3,21 @@ domain model is mental map of that business owner have of their business
 """
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional,NewType
+from typing import Optional, NewType, List
+
 
 Quantity=NewType("Quantity", int)
 SKU=NewType("SKU",str)
 Reference=NewType("Reference",str)
-
 
 @dataclass(frozen=True)
 class OrderLine:
     orderid:str
     sku: str
     qty: int
+
+class OutOfStock(Exception):
+    pass
 
 class Batch:
     def __init__(self, ref: Reference, sku: SKU, qty: Quantity, eta: Optional[date]):
@@ -42,3 +45,26 @@ class Batch:
 
     def can_allocate(self,line:OrderLine)->bool:
         return self.sku==line.sku and self.available_quantity>=line.qty
+
+    def __eq__(self, other):
+        if not isinstance(other, Batch):
+            return False
+        return other.reference==self.reference
+
+    def __hash__(self):
+        return hash(self.reference)
+
+    def __gt__(self, other):
+        if self.eta is None:
+            return False
+        if other.eta is None:
+            return True
+        return self.eta>other.eta
+
+def allocate(line:OrderLine, batches:List[Batch]):
+    try:
+        batch=next(b for b in sorted(batches) if b.can_allocate(line))
+        batch.allocate(line)
+        return batch.reference
+    except StopIteration:
+        raise OutOfStock(f"out of stock sku {line.sku}")

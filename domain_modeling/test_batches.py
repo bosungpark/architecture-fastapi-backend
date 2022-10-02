@@ -5,6 +5,7 @@ import pytest
 from datetime import date
 from domain_modeling.model import Batch, OrderLine
 
+
 def make_batch_and_line(sku, batch_qty, linr_qty):
     return (Batch("batch-001", sku, batch_qty, eta=date.today()),
             OrderLine("order-123", sku, linr_qty))
