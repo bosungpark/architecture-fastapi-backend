@@ -1,8 +1,8 @@
 from typing import List
 
-from allocation.adapters.repository import AbstractRepository
-from allocation.domain import model
-from allocation.domain.model import SKU, Batch, OrderLine, Reference
+from src.allocation.adapters.repository import AbstractRepository
+from src.allocation.domain import model
+from src.allocation.domain.model import SKU, Batch, OrderLine, Reference
 
 
 class InvalidSku(Exception):

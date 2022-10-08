@@ -1,3 +1,7 @@
+"""
+run cmd: uvicorn src.allocation.entrypoints.api:app --host=127.0.0.1 --port=8000 --reload
+"""
+
 import uuid
 
 import pytest
