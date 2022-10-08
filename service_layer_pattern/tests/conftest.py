@@ -96,6 +96,6 @@ def postgres_session(postgres_db):
 
 @pytest.fixture
 def restart_api():
-    (Path(__file__).parent.parent / "src/allocation/entrypoints/fast_api.py").touch()
+    (Path(__file__).parent.parent / "src/allocation/entrypoints/api.py").touch()
     time.sleep(1)
     wait_for_webapp_to_come_up()
