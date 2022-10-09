@@ -15,29 +15,26 @@ class FakeSession():
         self.commited=True
 
 def test_commits():
-    line = OrderLine("o1", "LAMP", 10)
     batch = Batch("b1", "LAMP", 100, eta=None)
     repo = FakeRepository([batch])
     session=FakeSession()
 
-    services.allocate(line, repo, session)
+    services.allocate("o1", "LAMP", 10, repo, session)
     assert session.commited is True
 
 def test_returns_allocation():
-    line = OrderLine("o1", "LAMP", 10)
     batch = Batch("b1", "LAMP", 100, eta=None)
     repo = FakeRepository([batch])
 
-    result = services.allocate(line, repo, FakeSession())
+    result = services.allocate("o1", "LAMP", 10, repo, FakeSession())
     assert result == "b1"
 
 def test_error_for_invalid_sku():
-    line = OrderLine("o1", "LAMP-1", 10)
     batch = Batch("b1", "LAMP-2", 100, eta=None)
     repo = FakeRepository([batch])
 
     with pytest.raises(InvalidSku, match=f"Invalid sku LAMP-1"):
-        result = services.allocate(line, repo, FakeSession())
+        services.allocate("o1", "LAMP-1", 10, repo, FakeSession())
 
 # domain-test
 def test_prefers_current_stock_batches_to_shipments():
@@ -56,9 +53,8 @@ def test_prefers_current_stock_batches_to_shipments():
     shipment_batch = Batch("shipment_batch", "clock", 100, eta=date.max)
     repo=FakeRepository([in_stock_batch,shipment_batch])
     session=FakeSession()
-    line=OrderLine("oref", "clock", 10)
 
-    services.allocate(line, repo, session)
+    services.allocate("oref", "clock", 10, repo, session)
 
     assert in_stock_batch.available_quantity == 90
     assert shipment_batch.available_quantity == 100
