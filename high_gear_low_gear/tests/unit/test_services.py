@@ -2,11 +2,29 @@ from datetime import date
 
 import pytest
 
-from allocation.adapters.repository import FakeRepository
+from allocation.adapters.repository import AbstractRepository
 from allocation.domain.model import OrderLine, Batch, allocate
 from allocation.service_layer import services
 from allocation.service_layer.services import InvalidSku
 
+class FakeRepository(AbstractRepository):
+    def __init__(self,batches):
+        self._batches=set(batches)
+
+    def add(self, batch):
+        self._batches.add(batch)
+
+    def get(self, reference):
+        return next(b for b in self._batches if b.reference==reference)
+
+    def list(self):
+        return list(self._batches)
+
+    @staticmethod
+    def for_batch(ref, sku, qty, eta=None):
+        return FakeRepository([
+            Batch(ref, sku, qty, eta=None)
+        ])
 
 class FakeSession():
     commited=False
@@ -23,15 +41,12 @@ def test_commits():
     assert session.commited is True
 
 def test_returns_allocation():
-    batch = Batch("b1", "LAMP", 100, eta=None)
-    repo = FakeRepository([batch])
-
+    repo = FakeRepository.for_batch("b1", "LAMP", 100, eta=None)
     result = services.allocate("o1", "LAMP", 10, repo, FakeSession())
     assert result == "b1"
 
 def test_error_for_invalid_sku():
-    batch = Batch("b1", "LAMP-2", 100, eta=None)
-    repo = FakeRepository([batch])
+    repo = FakeRepository.for_batch("b1", "LAMP-2", 100, eta=None)
 
     with pytest.raises(InvalidSku, match=f"Invalid sku LAMP-1"):
         services.allocate("o1", "LAMP-1", 10, repo, FakeSession())
