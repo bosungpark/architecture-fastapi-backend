@@ -33,23 +33,29 @@ class FakeSession():
         self.commited=True
 
 def test_commits():
-    batch = Batch("b1", "LAMP", 100, eta=None)
-    repo = FakeRepository([batch])
+    repo = FakeRepository.for_batch("b1", "LAMP", 100, eta=None)
     session=FakeSession()
 
     services.allocate("o1", "LAMP", 10, repo, session)
     assert session.commited is True
 
+def test_add_batch():
+    repo, session = FakeRepository([]), FakeSession()
+    services.add_batch("o1", "LAMP-1", 10, None, repo, session)
+
+    assert repo.get("o1") is not None
+    assert session.commited
+
 def test_returns_allocation():
-    repo = FakeRepository.for_batch("b1", "LAMP", 100, eta=None)
-    result = services.allocate("o1", "LAMP", 10, repo, FakeSession())
+    repo, session = FakeRepository.for_batch("b1", "LAMP", 100, eta=None), FakeSession()
+    result = services.allocate("o1", "LAMP", 10, repo, session)
     assert result == "b1"
 
 def test_error_for_invalid_sku():
-    repo = FakeRepository.for_batch("b1", "LAMP-2", 100, eta=None)
+    repo, session= FakeRepository.for_batch("b1", "LAMP-2", 100, eta=None), FakeSession()
 
     with pytest.raises(InvalidSku, match=f"Invalid sku LAMP-1"):
-        services.allocate("o1", "LAMP-1", 10, repo, FakeSession())
+        services.allocate("o1", "LAMP-1", 10, repo, session)
 
 # domain-test
 def test_prefers_current_stock_batches_to_shipments():
