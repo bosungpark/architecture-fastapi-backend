@@ -25,6 +25,18 @@ def allocate(orderid:str, sku:str, qty: int,
         uow.commit()
     return batchref
 
+
+def reallocate(orderid:str, sku:str, qty: int,
+             uow: AbstractUnitOfWork)-> str:
+    line: OrderLine = OrderLine(orderid=orderid, sku=sku, qty=qty)
+    with uow:
+        batch: Batch = uow.batches.get(sku)
+        if batch is None:
+            raise InvalidSku(f"Invalid sku {sku}")
+        batch.deallocate(line)
+        allocate(line)
+        uow.commit()
+
 def add_batch(
         ref: str, sku:str, qty: int, eta: Optional[date],
         uow: AbstractUnitOfWork

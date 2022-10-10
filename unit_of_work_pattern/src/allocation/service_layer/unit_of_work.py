@@ -15,7 +15,7 @@ class AbstractUnitOfWork(abc.ABC):
         self.rollback()
 
     def __enter__(self):
-        pass
+        return self
 
     @abc.abstractmethod
     def commit(self):
