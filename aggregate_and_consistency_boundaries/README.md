@@ -42,4 +42,4 @@
 
 *Aggregates, Bounded Context, Microservies*
 
-- Bounded Context 전략: 단 하나의 모델로 모든 경우의 수를 커버하는 대신, 쪼개진 모델의 결합으로써 맥락을 만들고, 이를 통해 트랜잭션을 관리하는 것.
+- Bounded Context 전략: 단 하나의 모델로 모든 경우의 수를 커버하는 대신, 쪼개진 모델의 결합으로써 맥락을 만들고, 이를 통해 트랜잭션을 관리하는 것이다.
