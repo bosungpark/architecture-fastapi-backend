@@ -16,30 +16,21 @@ def allocate(orderid:str, sku:str, qty: int,
              uow: AbstractUnitOfWork)-> str:
     line: OrderLine = OrderLine(orderid=orderid, sku=sku, qty=qty)
     with uow:
-        batches: List[Batch] = uow.batches.list()
-
-        if not is_valid_sku(sku, batches):
+        product= uow.products.get(sku=line.sku)
+        if product is None:
             raise InvalidSku(f"Invalid sku {sku}")
-        batchref: Reference = model.allocate(line, batches)
+        batchref: Reference = product.allocate(line)
         uow.commit()
     return batchref
-
-
-def reallocate(orderid:str, sku:str, qty: int,
-             uow: AbstractUnitOfWork)-> str:
-    line: OrderLine = OrderLine(orderid=orderid, sku=sku, qty=qty)
-    with uow:
-        batch: Batch = uow.batches.get(sku)
-        if batch is None:
-            raise InvalidSku(f"Invalid sku {sku}")
-        batch.deallocate(line)
-        allocate(line)
-        uow.commit()
 
 def add_batch(
         ref: str, sku:str, qty: int, eta: Optional[date],
         uow: AbstractUnitOfWork
 ):
     with uow:
-        uow.batches.add(Batch(ref, sku, qty, eta))
+        product = uow.products.get(sku=sku)
+        if product is None:
+            product=model.Product(sku, batches=[])
+            uow.products.add(product)
+        product.batches.append(Batch(ref, sku, qty, eta))
         uow.commit()

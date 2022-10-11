@@ -5,11 +5,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import Session
 
 from allocation import config
-from allocation.adapters.repository import AbstractRepository, SqlAlchemyRepository
+from allocation.adapters.repository import SqlAlchemyRepository, AbstractProductRepository
 
 
 class AbstractUnitOfWork(abc.ABC):
-    batches: AbstractRepository
+    products: AbstractProductRepository
 
     def __exit__(self, *args):
         self.rollback()
@@ -35,7 +35,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
     def __enter__(self):
         self.session : Session= self.session_factory()
-        self.batches = SqlAlchemyRepository(self.session)
+        self.products = SqlAlchemyRepository(self.session)
         return super().__enter__()
 
     def __exit__(self, *args):
