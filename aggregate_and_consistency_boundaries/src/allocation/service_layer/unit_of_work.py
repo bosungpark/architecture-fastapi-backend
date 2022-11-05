@@ -5,11 +5,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import Session
 
 from allocation import config
-from allocation.adapters.repository import SqlAlchemyRepository, AbstractProductRepository
+from allocation.adapters.repository import AbstractRepository, SqlAlchemyRepository
 
 
 class AbstractUnitOfWork(abc.ABC):
-    products: AbstractProductRepository
+    products: AbstractRepository
 
     def __exit__(self, *args):
         self.rollback()
@@ -27,6 +27,7 @@ class AbstractUnitOfWork(abc.ABC):
 
 DEFAULT_SESSION_FACTORY=sessionmaker(bind=create_engine(
     config.get_postgres_uri(),
+    isolation_level="REPEATABLE READ",
 ))
 
 class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
