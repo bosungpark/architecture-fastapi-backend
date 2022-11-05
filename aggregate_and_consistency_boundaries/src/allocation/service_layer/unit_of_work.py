@@ -27,6 +27,7 @@ class AbstractUnitOfWork(abc.ABC):
 
 DEFAULT_SESSION_FACTORY=sessionmaker(bind=create_engine(
     config.get_postgres_uri(),
+    # 데이터의의 정합성에 관한 설정
     isolation_level="REPEATABLE READ",
 ))
 

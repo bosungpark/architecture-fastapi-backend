@@ -1,4 +1,7 @@
 import abc
+
+from sqlalchemy.orm import Session
+
 from allocation.domain import model
 
 
@@ -14,10 +17,13 @@ class AbstractRepository(abc.ABC):
 
 class SqlAlchemyRepository(AbstractRepository):
     def __init__(self, session):
-        self.session = session
+        self.session :Session= session
 
     def add(self, product):
         self.session.add(product)
 
     def get(self, sku):
-        return self.session.query(model.Product).filter_by(sku=sku).first()
+        return self.session.query(model.Product).\
+            filter_by(sku=sku).\
+            with_for_update().\
+            first()
